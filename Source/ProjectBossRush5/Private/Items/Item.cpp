@@ -8,6 +8,8 @@ AItem::AItem()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	m_ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
+	RootComponent = m_ItemMesh;
 }
 
 void AItem::BeginPlay()
@@ -15,17 +17,25 @@ void AItem::BeginPlay()
 	Super::BeginPlay();
 	
 	// UE_LOG(LogTemp, Warning, TEXT("Begin Play called!"));
-	//
 	// if (GEngine)
 	// 	GEngine->AddOnScreenDebugMessage(1, 60.0f, FColor::Red, FString("Item OnScreen Message!"));
-	UWorld* World = GetWorld();
-	FVector Location = GetActorLocation();
-	FVector Forward = GetActorForwardVector();
+	//FVector Location = GetActorLocation();
+	//FVector Forward = GetActorForwardVector();
 
-	DRAW_SPHERE(Location);
+	//DRAW_SPHERE(Location);
 	//DRAW_LINE(Location, Location + Forward * 100.0f);
 	//DRAW_POINT(Location + Forward * 100.0f);
-	DRAW_VECTOR(Location, Location + Forward * 100.0f);
+	//DRAW_VECTOR(Location, Location + Forward * 100.0f);
+}
+
+float AItem::TransformedSin()
+{
+	return m_Amplitude * FMath::Sin(m_RunningTime * m_TimeConstant);
+}
+
+float AItem::TransformedCos()
+{
+	return m_Amplitude * FMath::Cos(m_RunningTime * m_TimeConstant);
 }
 
 void AItem::Tick(float DeltaTime)
@@ -39,5 +49,23 @@ void AItem::Tick(float DeltaTime)
 	// 	GEngine->AddOnScreenDebugMessage(1, 60.0f, FColor::Red, Message);
 	// 	UE_LOG(LogTemp, Warning, TEXT("Item Name: %s"), *Name);
 	// }
+
+	// // Movement rate in Units of cm/s
+	// float MovementRate = 50.f;
+	// float RotationRate = 45.0f;
+	//
+	// // MovementRate * DeltaTime (cm/s) * (s/frame) = (cm/frame)
+	// AddActorWorldOffset(FVector(MovementRate * DeltaTime, 0.f, 0.f));
+	// AddActorWorldRotation(FRotator(0.f, RotationRate * DeltaTime, 0.f));
+
+	m_RunningTime += DeltaTime;
+	// float DeltaZ = m_Amplitude * FMath::Sin(m_RunningTime * m_TimeConstant);
+	// AddActorWorldOffset(FVector(0.f, 0.f, DeltaZ));
+	
+	// DRAW_SPHERE_SINGLEFRAME(GetActorLocation());
+	// DRAW_VECTOR_SINGLEFRAME(GetActorLocation(), GetActorLocation() + GetActorForwardVector() * 100.0f);
+	//
+	// FVector AvgVector = Avg<FVector>(GetActorLocation(), FVector::ZeroVector);
+	// DRAW_POINT_SINGLEFRAME(AvgVector);
 }
 
