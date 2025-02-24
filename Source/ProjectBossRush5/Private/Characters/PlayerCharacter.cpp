@@ -31,6 +31,23 @@ void APlayerCharacter::BeginPlay()
 	
 }
 
+void APlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis(FName("MoveForward"), this, &APlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis(FName("MoveRight"), this, &APlayerCharacter::MoveRight);
+	PlayerInputComponent->BindAxis(FName("Turn"), this, &APlayerCharacter::Turn);
+	PlayerInputComponent->BindAxis(FName("LookUp"), this, &APlayerCharacter::LookUp);
+	PlayerInputComponent->BindAction(FName("Jump"), IE_Pressed, this, &ACharacter::Jump);
+}
+
 void APlayerCharacter::MoveForward(float Value)
 {
 	if (Controller && (Value != 0.f))
@@ -69,20 +86,3 @@ void APlayerCharacter::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
 }
-
-void APlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAxis(FName("MoveForward"), this, &APlayerCharacter::MoveForward);
-	PlayerInputComponent->BindAxis(FName("MoveRight"), this, &APlayerCharacter::MoveRight);
-	PlayerInputComponent->BindAxis(FName("Turn"), this, &APlayerCharacter::Turn);
-	PlayerInputComponent->BindAxis(FName("LookUp"), this, &APlayerCharacter::LookUp);
-}
-
