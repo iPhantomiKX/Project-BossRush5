@@ -2,7 +2,10 @@
 
 
 #include "Items/Item.h"
+
 #include "ProjectBossRush5/DebugMacros.h"
+#include "Components/SphereComponent.h"
+#include "Characters/PlayerCharacter.h"
 
 AItem::AItem()
 {
@@ -10,11 +13,17 @@ AItem::AItem()
 
 	m_ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	RootComponent = m_ItemMesh;
+
+	m_Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	m_Sphere->SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
+
+	m_Sphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlap);
+	m_Sphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
 	
 	// UE_LOG(LogTemp, Warning, TEXT("Begin Play called!"));
 	// if (GEngine)
@@ -36,6 +45,30 @@ float AItem::TransformedSin()
 float AItem::TransformedCos()
 {
 	return m_Amplitude * FMath::Cos(m_RunningTime * m_TimeConstant);
+}
+
+void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->SetOverlappingItem(this);
+	}
+	// if (GEngine)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(1, 30.f, FColor::Red, OtherActor->GetName());
+	// }
+}
+
+void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->SetOverlappingItem(nullptr);
+	}
 }
 
 void AItem::Tick(float DeltaTime)

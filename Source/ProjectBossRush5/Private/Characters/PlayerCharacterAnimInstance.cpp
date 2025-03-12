@@ -26,5 +26,6 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	{
 		m_GroundSpeed = UKismetMathLibrary::VSizeXY(m_PlayerCharacterMovement->Velocity);
 		m_IsFalling = m_PlayerCharacterMovement->IsFalling();
+		m_CharacterState = m_PlayerCharacter->GetCharacterState();
 	}
 }

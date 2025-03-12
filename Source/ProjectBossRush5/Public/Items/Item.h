@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+//Forward Declaration
+class USphereComponent;
+
 UCLASS()
 class PROJECTBOSSRUSH5_API AItem : public AActor
 {
@@ -32,12 +35,23 @@ protected:
 
 	template<typename T>
 	T Avg(T First, T Second);
+
+	UFUNCTION()
+	virtual void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex);
+	
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* m_ItemMesh;
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float m_RunningTime;
 
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* m_ItemMesh;
+	USphereComponent* m_Sphere;
 };
 
 template <typename T>
