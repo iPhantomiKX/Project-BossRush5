@@ -9,6 +9,12 @@
 //Forward Declaration
 class USphereComponent;
 
+enum class EItemState : uint8
+{
+	EIS_Hovering,
+	EIS_Equipped
+};
+
 UCLASS()
 class PROJECTBOSSRUSH5_API AItem : public AActor
 {
@@ -46,12 +52,14 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* m_ItemMesh;
-private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float m_RunningTime;
+
+	EItemState m_ItemState = EItemState::EIS_Hovering;
 
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* m_Sphere;
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float m_RunningTime;
 };
 
 template <typename T>
