@@ -55,6 +55,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
+
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 private:
 	ECharacterState m_CharacterState = ECharacterState::ECS_Unequipped;
 
