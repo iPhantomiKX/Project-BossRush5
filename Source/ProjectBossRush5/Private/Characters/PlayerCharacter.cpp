@@ -58,6 +58,7 @@ void APlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type Collisi
 	if (m_EquippedWeapon && m_EquippedWeapon->GetWeaponBox())
 	{
 		m_EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
+		m_EquippedWeapon->IgnoreActors.Empty();
 	}
 }
 
@@ -144,7 +145,7 @@ void APlayerCharacter::PlayAttackMontage()
 	if (AnimInstance && m_AttackMontage)
 	{
 		AnimInstance->Montage_Play(m_AttackMontage);
-		const int32 Selection = FMath::RandRange(0, 1);
+		const int32 Selection = 1;
 		FName SectionName = FName();
 		switch (Selection)
 		{
@@ -161,7 +162,7 @@ void APlayerCharacter::PlayAttackMontage()
 	}
 }
 
-void APlayerCharacter::PlayEquipMontage(FName SectionName)
+void APlayerCharacter::PlayEquipMontage(const FName& SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && m_EquipMontage)
