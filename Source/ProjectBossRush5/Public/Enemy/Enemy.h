@@ -40,4 +40,7 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = Sounds)
 	USoundBase* m_HitSound;
+
+	UPROPERTY(EditAnywhere, Category = VisualEffects)
+	UParticleSystem* m_HitParticles;
 };
