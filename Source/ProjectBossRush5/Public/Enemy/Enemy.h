@@ -37,4 +37,7 @@ private:
 	*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* m_HitReactMontage;
+	
+	UPROPERTY(EditAnywhere, Category = Sounds)
+	USoundBase* m_HitSound;
 };
