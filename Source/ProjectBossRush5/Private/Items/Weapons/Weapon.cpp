@@ -2,6 +2,8 @@
 
 
 #include "Items/Weapons/Weapon.h"
+
+#include "NiagaraComponent.h"
 #include "Characters/PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
@@ -46,6 +48,10 @@ void AWeapon::Equip(USceneComponent* InParent, FName InSocketName)
 	if (m_Sphere)
 	{
 		m_Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	if (m_EmbersEffect)
+	{
+		m_EmbersEffect->Deactivate();
 	}
 }
 

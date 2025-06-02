@@ -6,6 +6,7 @@
 #include "ProjectBossRush5/DebugMacros.h"
 #include "Components/SphereComponent.h"
 #include "Characters/PlayerCharacter.h"
+#include "NiagaraComponent.h"
 
 AItem::AItem()
 {
@@ -16,6 +17,9 @@ AItem::AItem()
 
 	m_Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	m_Sphere->SetupAttachment(GetRootComponent());
+
+	m_EmbersEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("EmbersEffect"));
+	m_EmbersEffect->SetupAttachment(GetRootComponent());
 }
 
 void AItem::BeginPlay()
