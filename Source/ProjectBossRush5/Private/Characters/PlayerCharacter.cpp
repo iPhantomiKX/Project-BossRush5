@@ -32,6 +32,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Tags.Add("Player");
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
