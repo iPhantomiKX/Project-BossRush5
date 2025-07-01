@@ -7,7 +7,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
-#include "Components/BoxComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -54,14 +53,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction(FName("Attack"), IE_Pressed, this, &APlayerCharacter::Attack);
 }
 
-void APlayerCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
-{
-	if (m_EquippedWeapon && m_EquippedWeapon->GetWeaponBox())
-	{
-		m_EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnabled);
-		m_EquippedWeapon->IgnoreActors.Empty();
-	}
-}
+
 
 void APlayerCharacter::MoveForward(float Value)
 {
@@ -134,7 +126,7 @@ void APlayerCharacter::EKeyPressed()
 
 void APlayerCharacter::Attack()
 {
-	if (CanAtttack())
+	if (CanAttack())
 	{
 		PlayAttackMontage();
 		m_ActionState = EActionState::EAS_Attacking;
@@ -179,12 +171,10 @@ void APlayerCharacter::AttackEnd()
 	m_ActionState = EActionState::EAS_Unoccupied;
 }
 
-bool APlayerCharacter::CanAtttack()
+bool APlayerCharacter::CanAttack()
 {
 	return m_ActionState == EActionState::EAS_Unoccupied && m_CharacterState != ECharacterState::ECS_Unequipped;
 }
-
-
 
 bool APlayerCharacter::CanDisarm()
 {

@@ -3,18 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "BaseCharacter.h"
 #include "CharacterTypes.h"
 #include "PlayerCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class AItem;
-class UAnimMontage;
-class AWeapon;
 
 UCLASS()
-class PROJECTBOSSRUSH5_API APlayerCharacter : public ACharacter
+class PROJECTBOSSRUSH5_API APlayerCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -22,26 +20,28 @@ public:
 	APlayerCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+
 protected:
+	virtual void BeginPlay() override;
+	
 	/**
 	 * Callback for Input
 	 */
-	virtual void BeginPlay() override;
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void LookUp(float Value);
 	void EKeyPressed();
-	void Attack();
+	virtual void Attack() override;
 
 	/**
 	 * Play Montage functions
 	 */
-	void PlayAttackMontage();
+	virtual void PlayAttackMontage() override;
 
-	UFUNCTION(BlueprintCallable)
-	void AttackEnd();
-	bool CanAtttack();
+	virtual void AttackEnd() override;
+	virtual bool CanAttack() override;
 
 	void PlayEquipMontage(const FName& SectionName);
 	bool CanDisarm();
@@ -56,8 +56,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
 
-	UFUNCTION(BlueprintCallable)
-	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 private:
 	ECharacterState m_CharacterState = ECharacterState::ECS_Unequipped;
 
@@ -73,14 +71,12 @@ private:
 	UPROPERTY(VisibleInstanceOnly)
 	AItem* m_OverlappingItem;
 
-	UPROPERTY(VisibleInstanceOnly)
-	AWeapon* m_EquippedWeapon;
+
 
 	/** 
 	* Animation montages
 	*/
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* m_AttackMontage;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* m_EquipMontage;
