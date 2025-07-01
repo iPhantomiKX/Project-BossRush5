@@ -26,6 +26,7 @@ public:
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 							 AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void Destroyed() override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Die() override;
@@ -40,15 +41,14 @@ protected:
 	EDeathPose m_DeathPose = EDeathPose::EDP_Alive;
 
 private:
-
-
 	UPROPERTY(VisibleAnywhere)
 	UHealthBarComponent* m_HealthBarWidget;
 
 	UPROPERTY(VisibleAnywhere)
 	UPawnSensingComponent* m_PawnSensing;
-	
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AWeapon> m_WeaponClass;
 
 	UPROPERTY()
 	AActor* m_CombatTarget;

@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
 #include "HUD/HealthBarComponent.h"
+#include "Items/Weapons/Weapon.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -54,6 +55,14 @@ void AEnemy::BeginPlay()
 	if (m_PawnSensing)
 	{
 		m_PawnSensing->OnSeePawn.AddDynamic(this, &AEnemy::PawnSeen);
+	}
+
+	UWorld* World = GetWorld();
+	if (World && m_WeaponClass)
+	{
+		AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(m_WeaponClass);
+		DefaultWeapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+		m_EquippedWeapon = DefaultWeapon;
 	}
 }
 
@@ -261,6 +270,14 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	MoveToTarget(m_CombatTarget);
 	return DamageAmount;
+}
+
+void AEnemy::Destroyed()
+{
+	if (m_EquippedWeapon)
+	{
+		m_EquippedWeapon->Destroy();
+	}
 }
 
 
