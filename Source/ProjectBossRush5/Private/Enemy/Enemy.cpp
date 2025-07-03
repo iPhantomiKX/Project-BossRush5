@@ -120,7 +120,7 @@ void AEnemy::MoveToTarget(AActor* Target)
 	if (m_EnemyController == nullptr || Target == nullptr) return;
 	FAIMoveRequest MoveRequest;
 	MoveRequest.SetGoalActor(Target);
-	MoveRequest.SetAcceptanceRadius(15.f);
+	MoveRequest.SetAcceptanceRadius(50.f);
 	m_EnemyController->MoveTo(MoveRequest);
 }
 
@@ -142,6 +142,43 @@ AActor* AEnemy::ChoosePatrolTarget()
 		return ValidTargets[TargetSelection];
 	}
 	return nullptr;
+}
+
+void AEnemy::Attack()
+{
+	Super::Attack();
+	PlayAttackMontage();
+}
+
+void AEnemy::PlayAttackMontage()
+{
+	Super::PlayAttackMontage();
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && m_AttackMontage)
+	{
+		AnimInstance->Montage_Play(m_AttackMontage);
+		//const int32 Selection = FMath::RandRange(0, 3);
+		const int32 Selection = 3;
+		FName SectionName = FName();
+		switch (Selection)
+		{
+		case 0:
+			SectionName = FName("Attack1");
+			break;
+		case 1:
+			SectionName = FName("Attack2");
+			break;
+		case 2:
+			SectionName = FName("Attack3");
+			break;
+		case 3:
+			SectionName = FName("Attack4");
+			break;
+		default:
+			break;
+		}
+		AnimInstance->Montage_JumpToSection(SectionName, m_AttackMontage);
+	}
 }
 
 // Called every frame
@@ -194,6 +231,7 @@ void AEnemy::CheckCombatTarget()
 		// Inside attack range, attack character
 		EnemyState = EEnemyState::EES_Attacking;
 		// TODO: Attack montage
+		Attack();
 	}
 }
 

@@ -126,6 +126,7 @@ void APlayerCharacter::EKeyPressed()
 
 void APlayerCharacter::Attack()
 {
+	Super::Attack();
 	if (CanAttack())
 	{
 		PlayAttackMontage();
@@ -135,6 +136,7 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::PlayAttackMontage()
 {
+	Super::PlayAttackMontage();
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && m_AttackMontage)
 	{
