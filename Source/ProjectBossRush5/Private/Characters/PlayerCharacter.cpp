@@ -134,30 +134,6 @@ void APlayerCharacter::Attack()
 	}
 }
 
-void APlayerCharacter::PlayAttackMontage()
-{
-	Super::PlayAttackMontage();
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && m_AttackMontage)
-	{
-		AnimInstance->Montage_Play(m_AttackMontage);
-		const int32 Selection = 1;
-		FName SectionName = FName();
-		switch (Selection)
-		{
-		case 0:
-			SectionName = FName("Attack1");
-			break;
-		case 1:
-			SectionName = FName("Attack2");
-			break;
-		default:
-			break;
-		}
-		AnimInstance->Montage_JumpToSection(SectionName, m_AttackMontage);
-	}
-}
-
 void APlayerCharacter::PlayEquipMontage(const FName& SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
