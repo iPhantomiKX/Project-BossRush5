@@ -82,6 +82,7 @@ void AEnemy::BeginPlay()
 	
 	if (m_PawnSensing) m_PawnSensing->OnSeePawn.AddDynamic(this, &AEnemy::PawnSeen);
 	InitializeEnemy();
+	Tags.Add("Enemy");
 }
 
 void AEnemy::Die()
@@ -312,7 +313,7 @@ void AEnemy::SpawnDefaultWeapon()
 	if (World && m_WeaponClass)
 	{
 		AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(m_WeaponClass);
-		DefaultWeapon->IgnoreActors.Add(this);
+		//DefaultWeapon->IgnoreActors.Add(this);
 		DefaultWeapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
 		m_EquippedWeapon = DefaultWeapon;
 	}
@@ -324,7 +325,7 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 		m_EnemyState != EEnemyState::EES_Dead &&
 		m_EnemyState != EEnemyState::EES_Chasing &&
 		m_EnemyState < EEnemyState::EES_Attacking &&
-		SeenPawn->ActorHasTag(FName("Player"));
+		SeenPawn->ActorHasTag(FName("EngageableTarget"));
 			
 	if (bShouldChaseTarget)
 	{
