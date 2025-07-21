@@ -11,8 +11,9 @@
 ABaseCharacter::ABaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	m_Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
 
+	m_Attributes = CreateDefaultSubobject<UAttributeComponent>(TEXT("Attributes"));
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 void ABaseCharacter::BeginPlay()
@@ -29,30 +30,6 @@ void ABaseCharacter::Die()
 {
 }
 
-int32 ABaseCharacter::PlayRandomMontageSection(UAnimMontage* Montage, const TArray<FName>& SectionNames)
-{
-	if (SectionNames.Num() <= 0) return -1;
-	const int32 MaxSectionIndex = SectionNames.Num() - 1;
-	const int32 Selection = FMath::RandRange(0, MaxSectionIndex);
-	PlayMontageSection(Montage, SectionNames[Selection]);
-	return Selection;
-}
-
-int32 ABaseCharacter::PlayAttackMontage()
-{
-	return PlayRandomMontageSection(m_AttackMontage, m_AttackMontageSections);
-}
-
-int32 ABaseCharacter::PlayDeathMontage()
-{
-	return PlayRandomMontageSection(m_DeathMontage, m_DeathMontageSections);
-}
-
-void ABaseCharacter::DisableCapsule()
-{
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
-
 void ABaseCharacter::PlayHitReactMontage(const FName& SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -63,18 +40,44 @@ void ABaseCharacter::PlayHitReactMontage(const FName& SectionName)
 	}
 }
 
-void ABaseCharacter::AttackEnd()
+void ABaseCharacter::DirectionalHitReact(const FVector& ImpactPoint)
 {
-}
+	const FVector Forward = GetActorForwardVector();
+	// Lower Impact Point to the Enemy's Actor Location Z
+	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
+	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
 
-bool ABaseCharacter::CanAttack()
-{
-	return false;
-}
+	// Forward * ToHit = |Forward||ToHit| * cos(theta)
+	// |Forward| = 1, |ToHit| = 1, so Forward * ToHit = cos(theta)
+	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	// Take the inverse cosine (arc-cosine) of cos(theta) to get theta
+	double Theta = FMath::Acos(CosTheta);
+	// convert from radians to degrees
+	Theta = FMath::RadiansToDegrees(Theta);
 
-bool ABaseCharacter::IsAlive()
-{
-	return m_Attributes && m_Attributes->IsAlive();
+	// if CrossProduct points down, Theta should be negative
+	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
+	if (CrossProduct.Z < 0)
+	{
+		Theta *= -1.f;
+	}
+	
+	FName Section("FromBack");
+
+	if (Theta >= -45.f && Theta < 45.f)
+	{
+		Section = FName("FromFront");
+	}
+	else if (Theta >= -135.f && Theta < -45.f)
+	{
+		Section = FName("FromLeft");
+	}
+	else if (Theta >= 45.f && Theta < 135.f)
+	{
+		Section = FName("FromRight");
+	}
+
+	PlayHitReactMontage(Section);
 }
 
 void ABaseCharacter::PlayHitSound(const FVector& ImpactPoint)
@@ -119,53 +122,42 @@ void ABaseCharacter::PlayMontageSection(UAnimMontage* Montage, const FName& Sect
 	}
 }
 
-void ABaseCharacter::DirectionalHitReact(const FVector& ImpactPoint)
+int32 ABaseCharacter::PlayRandomMontageSection(UAnimMontage* Montage, const TArray<FName>& SectionNames)
 {
-	const FVector Forward = GetActorForwardVector();
-	// Lower Impact Point to the Enemy's Actor Location Z
-	const FVector ImpactLowered(ImpactPoint.X, ImpactPoint.Y, GetActorLocation().Z);
-	const FVector ToHit = (ImpactLowered - GetActorLocation()).GetSafeNormal();
+	if (SectionNames.Num() <= 0) return -1;
+	const int32 MaxSectionIndex = SectionNames.Num() - 1;
+	const int32 Selection = FMath::RandRange(0, MaxSectionIndex);
+	PlayMontageSection(Montage, SectionNames[Selection]);
+	return Selection;
+}
 
-	// Forward * ToHit = |Forward||ToHit| * cos(theta)
-	// |Forward| = 1, |ToHit| = 1, so Forward * ToHit = cos(theta)
-	const double CosTheta = FVector::DotProduct(Forward, ToHit);
-	// Take the inverse cosine (arc-cosine) of cos(theta) to get theta
-	double Theta = FMath::Acos(CosTheta);
-	// convert from radians to degrees
-	Theta = FMath::RadiansToDegrees(Theta);
+int32 ABaseCharacter::PlayAttackMontage()
+{
+	return PlayRandomMontageSection(m_AttackMontage, m_AttackMontageSections);
+}
 
-	// if CrossProduct points down, Theta should be negative
-	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
-	if (CrossProduct.Z < 0)
-	{
-		Theta *= -1.f;
-	}
-	
-	FName Section("FromBack");
+int32 ABaseCharacter::PlayDeathMontage()
+{
+	return PlayRandomMontageSection(m_DeathMontage, m_DeathMontageSections);
+}
 
-	if (Theta >= -45.f && Theta < 45.f)
-	{
-		Section = FName("FromFront");
-	}
-	else if (Theta >= -135.f && Theta < -45.f)
-	{
-		Section = FName("FromLeft");
-	}
-	else if (Theta >= 45.f && Theta < 135.f)
-	{
-		Section = FName("FromRight");
-	}
+void ABaseCharacter::DisableCapsule()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
 
-	PlayHitReactMontage(Section);
-	
-	// UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + CrossProduct * 100.f, 5.f, FColor::Blue, 5.f);
-	//
-	// if (GEngine)
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Green, FString::Printf(TEXT("Theta: %f"), Theta));
-	// }
-	// UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + Forward * 60.f, 5.f, FColor::Red, 5.f);
-	// UKismetSystemLibrary::DrawDebugArrow(this, GetActorLocation(), GetActorLocation() + ToHit * 60.f, 5.f, FColor::Green, 5.f);
+bool ABaseCharacter::CanAttack()
+{
+	return false;
+}
+
+bool ABaseCharacter::IsAlive()
+{
+	return m_Attributes && m_Attributes->IsAlive();
+}
+
+void ABaseCharacter::AttackEnd()
+{
 }
 
 void ABaseCharacter::Tick(float DeltaTime)

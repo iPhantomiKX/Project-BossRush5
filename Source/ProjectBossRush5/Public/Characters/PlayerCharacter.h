@@ -18,16 +18,13 @@ class PROJECTBOSSRUSH5_API APlayerCharacter : public ABaseCharacter
 
 public:
 	APlayerCharacter();
-	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 
 protected:
 	virtual void BeginPlay() override;
 	
-	/**
-	 * Callback for Input
-	 */
+	/** Callbacks for Input */
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Turn(float Value);
@@ -35,46 +32,48 @@ protected:
 	void EKeyPressed();
 	virtual void Attack() override;
 
+	/** Combat */
+	void EquipWeapon(AWeapon* Weapon);
 	virtual void AttackEnd() override;
 	virtual bool CanAttack() override;
-
-	void PlayEquipMontage(const FName& SectionName);
 	bool CanDisarm();
 	bool CanArm();
-
+	
 	UFUNCTION(BlueprintCallable)
 	void Disarm();
-
 	UFUNCTION(BlueprintCallable)
 	void Arm();
+	
+	void PlayEquipMontage(const FName& SectionName);
 
+	UFUNCTION(BlueprintCallable)
+	void AttachWeaponToBack();
+	
+	UFUNCTION(BlueprintCallable)
+	void AttachWeaponToHand();
+	
 	UFUNCTION(BlueprintCallable)
 	void FinishEquipping();
 
 private:
+	/** Character Components */
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* m_CameraBoom;
+	
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* m_ViewCamera;
+	
+	UPROPERTY(VisibleInstanceOnly)
+	AItem* m_OverlappingItem;
+	
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* m_EquipMontage;
+	
 	ECharacterState m_CharacterState = ECharacterState::ECS_Unequipped;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	EActionState m_ActionState = EActionState::EAS_Unoccupied;
 	
-	UPROPERTY(VisibleAnywhere)
-	USpringArmComponent* m_CameraBoom;
-
-	UPROPERTY(VisibleAnywhere)
-	UCameraComponent* m_ViewCamera;
-
-	UPROPERTY(VisibleInstanceOnly)
-	AItem* m_OverlappingItem;
-
-
-
-	/** 
-	* Animation montages
-	*/
-
-
-	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* m_EquipMontage;
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* item) {m_OverlappingItem = item;}
 	FORCEINLINE ECharacterState GetCharacterState() const { return m_CharacterState; }
