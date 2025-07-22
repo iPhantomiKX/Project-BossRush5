@@ -100,11 +100,14 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 	|| OtherActor == GetOwner())
 		return;
 	
+	
 	FHitResult BoxHit;
 	BoxTrace(BoxHit);
 
-	if (BoxHit.GetActor())
+	if (BoxHit.GetActor() && BoxHit.GetActor() == OtherActor)
 	{
+		UE_LOG(LogTemp, Error, TEXT("%s"), *BoxHit.GetActor()->GetName());
+		
 		if (ActorIsSameType(BoxHit.GetActor())
 		|| BoxHit.GetActor() == GetOwner()) return;
 		
@@ -112,7 +115,7 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 		// 	return;
 
 		UGameplayStatics::ApplyDamage(
-			BoxHit.GetActor(),
+			OtherActor,
 			Damage,
 			GetInstigator()->GetController(),
 			this,
