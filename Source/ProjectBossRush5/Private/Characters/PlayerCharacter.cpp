@@ -47,9 +47,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction(FName("Attack"), IE_Pressed, this, &APlayerCharacter::Attack);
 }
 
-void APlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint)
+void APlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
 {
-	Super::GetHit_Implementation(ImpactPoint);
+	Super::GetHit_Implementation(ImpactPoint, Hitter);
+
+	SetWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
+	m_ActionState = EActionState::EAS_HitReaction;
 }
 
 void APlayerCharacter::BeginPlay()
@@ -202,6 +205,11 @@ void APlayerCharacter::PlayEquipMontage(const FName& SectionName)
 }
 
 void APlayerCharacter::FinishEquipping()
+{
+	m_ActionState = EActionState::EAS_Unoccupied;
+}
+
+void APlayerCharacter::HitReactEnd()
 {
 	m_ActionState = EActionState::EAS_Unoccupied;
 }
