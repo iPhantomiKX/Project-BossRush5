@@ -161,6 +161,28 @@ void ABaseCharacter::StopAttackMontage()
 	}
 }
 
+FVector ABaseCharacter::GetTranslationWarpTarget()
+{
+	if (m_CombatTarget == nullptr) return FVector();
+
+	const FVector CombatTargetLocation = m_CombatTarget->GetActorLocation();
+	const FVector Location = GetActorLocation();
+
+	FVector TargetToMe = (Location - CombatTargetLocation).GetSafeNormal();
+	TargetToMe *= WarpTargetDistance;
+
+	return CombatTargetLocation + TargetToMe;
+}
+
+FVector ABaseCharacter::GetRotationWarpTarget()
+{
+	if (m_CombatTarget)
+	{
+		return m_CombatTarget->GetActorLocation();
+	}
+	return FVector();
+}
+
 void ABaseCharacter::DisableCapsule()
 {
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
