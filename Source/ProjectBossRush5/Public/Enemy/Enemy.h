@@ -40,17 +40,11 @@ protected:
 	virtual bool CanAttack() override;
 	virtual void AttackEnd() override;
 	virtual void HandleDamage(float DamageAmount) override;
-	virtual int32 PlayDeathMontage() override;
 	/** </ABaseCharacter> */
-	
-	UPROPERTY(BlueprintReadOnly)
-	TEnumAsByte<EDeathPose> m_DeathPose;
 	
 	UPROPERTY(VisibleAnywhere, Category = Combat)
 	EEnemyState m_EnemyState = EEnemyState::EES_Patrolling;
 
-	// UPROPERTY(BlueprintReadOnly, Category = Combat)
-	// AActor* m_CombatTarget;
 private:
 
 	/** AI BEHAVIOUR */

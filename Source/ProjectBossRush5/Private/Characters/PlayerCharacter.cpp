@@ -6,8 +6,11 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/AttributeComponent.h"
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
+#include "HUD/PlayerHUD.h"
+#include "HUD/PlayerOverlay.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -42,9 +45,25 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis(FName("MoveRight"), this, &APlayerCharacter::MoveRight);
 	PlayerInputComponent->BindAxis(FName("Turn"), this, &APlayerCharacter::Turn);
 	PlayerInputComponent->BindAxis(FName("LookUp"), this, &APlayerCharacter::LookUp);
-	PlayerInputComponent->BindAction(FName("Jump"), IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(FName("Jump"), IE_Pressed, this, &APlayerCharacter::Jump);
 	PlayerInputComponent->BindAction(FName("Equip"), IE_Pressed, this, &APlayerCharacter::EKeyPressed);
 	PlayerInputComponent->BindAction(FName("Attack"), IE_Pressed, this, &APlayerCharacter::Attack);
+}
+
+void APlayerCharacter::Jump()
+{
+	if (IsUnoccupied())
+	{
+		Super::Jump();
+	}
+}
+
+float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	HandleDamage(DamageAmount);
+	SetHUDHealth();
+	return DamageAmount; 
 }
 
 void APlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter)
@@ -52,7 +71,10 @@ void APlayerCharacter::GetHit_Implementation(const FVector& ImpactPoint, AActor*
 	Super::GetHit_Implementation(ImpactPoint, Hitter);
 
 	SetWeaponCollisionEnabled(ECollisionEnabled::NoCollision);
-	m_ActionState = EActionState::EAS_HitReaction;
+	if (m_Attributes && m_Attributes->GetHealthPercent() > 0.f)
+	{
+		m_ActionState = EActionState::EAS_HitReaction;
+	}
 }
 
 void APlayerCharacter::BeginPlay()
@@ -60,6 +82,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	Tags.Add("EngageableTarget");
+	InitializePlayerOverlay();
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -204,6 +227,14 @@ void APlayerCharacter::PlayEquipMontage(const FName& SectionName)
 	}
 }
 
+void APlayerCharacter::Die()
+{
+	Super::Die();
+
+	m_ActionState = EActionState::EAS_Dead;
+	DisableMeshCollision();
+}
+
 void APlayerCharacter::FinishEquipping()
 {
 	m_ActionState = EActionState::EAS_Unoccupied;
@@ -212,4 +243,35 @@ void APlayerCharacter::FinishEquipping()
 void APlayerCharacter::HitReactEnd()
 {
 	m_ActionState = EActionState::EAS_Unoccupied;
+}
+
+bool APlayerCharacter::IsUnoccupied()
+{
+	return m_ActionState == EActionState::EAS_Unoccupied;
+}
+
+void APlayerCharacter::InitializePlayerOverlay()
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		APlayerHUD* PlayerHUD = Cast<APlayerHUD>(PlayerController->GetHUD());
+		if (PlayerHUD)
+		{
+			m_PlayerOverlay = PlayerHUD->GetPlayerOverlay();
+			if (m_PlayerOverlay && m_Attributes)
+			{
+				m_PlayerOverlay->SetHealthBarPercent(m_Attributes->GetHealthPercent());
+				m_PlayerOverlay->SetStaminaBarPercent(1.f);
+			}
+		}
+	}
+}
+
+void APlayerCharacter::SetHUDHealth()
+{
+	if (m_PlayerOverlay && m_Attributes)
+	{
+		m_PlayerOverlay->SetHealthBarPercent(m_Attributes->GetHealthPercent());
+	}
 }
